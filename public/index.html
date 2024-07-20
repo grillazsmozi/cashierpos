@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f4f4f4;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .calculator {
+      width: 50%;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      height: 100vh;
+    }
+    
+    .display {
+      background-color: #f0f0f0;
+      padding: 10px;
+      font-size: 24px;
+      text-align: right;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      height: 90vh;
+      overflow-y: scroll;
+    }
+    
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 10px;
+    }
+    
+    button {
+      background-color: #eee;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      height: 100px;
+      font-size: 50px;
+    }
+    
+    button:hover {
+      background-color: #ddd;
+    }
+    
+    button:active {
+      background-color: #ccc;
+      transform: translateY(2px);
+    }
+    
+    .orange {
+      background-color: #FFA500;
+      color: white;
+    }
+
+    .brown {
+      background-color: #b38166;
+      color: white;
+    }
+    
+    .red {
+      background-color: #FF0000;
+      color: white;
+    }
+    
+    .green {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .blue {
+      background-color: #008CBA;
+      color: white;
+    }
+
+    ul {
+        list-style-type: none;
+        margin: none;
+        padding: none;
+    }
+
+    li {
+        margin: 0px;
+        padding: 0px;
+        font-size: 50px;
+    }
+
+    #left-text {
+      text-align: left;
+    }
+
+    .disabled {
+      background-color: #ccc;
+      color: #929292;
+    }
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <div class="calculator">
+            <div class="display">
+                <ul id="items">
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="calculator">
+          <div class="buttons">
+            <button value="7" onclick="number(this)">7</button>
+            <button value="8" onclick="number(this)">8</button>
+            <button value="9" onclick="number(this)">9</button>
+            <button class="orange" value="+" onclick="btnFunction(this)">+</button>
+            <button value="4" onclick="number(this)">4</button>
+            <button value="5" onclick="number(this)">5</button>
+            <button value="6" onclick="number(this)">6</button>
+            <button class="orange" id="times">X</button>
+            <button value="1" onclick="number(this)">1</button>
+            <button value="2" onclick="number(this)">2</button>
+            <button value="3" onclick="number(this)">3</button>
+            <button id="clear">Clear</button>
+            <button value="0" onclick="number(this)">0</button>
+            <button class="red" value="c" onclick="btnFunction(this)">C</button>
+            <button class="blue" value="total" onclick="btnFunction(this)">Total</button>
+            <button class="disabled" value="del" onclick="btnFunction(this)" disabled>Delete</button>
+          </div>
+          <button class="green" style="width: 31%; margin-top: 10px; float: right; margin-left: 5px;" value="pay" onclick="btnFunction(this)" >PAY</button>
+          <button class="brown" style="width: 31%; margin-top: 10px; float: right; margin-left: 5px;" value="card" onclick="btnFunction(this)">CARD</button>
+          <button class="disabled" style="width: 31%; margin-top: 10px; float: right; margin-left: 5px;" disabled>MORE</button>
+        </div>
+      </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let Total = 0;
+    let currentString = "";
+    let multiplier = 1;
+    let lastNum = 0;
+    let currentNumber = 0;
+    let tempNumber = "";
+    let payed = 0;
+
+    function createNewLi(isleft,isPay) {
+      if (isleft) {
+        if (isPay) {
+          let li = document.createElement("li");
+          const ul = document.querySelector("#items")
+          ul.appendChild(li);
+          //li.classList.add('current')
+          li.setAttribute('id','payment')
+          li.style.textAlign = "left"
+          return
+        }
+        let li = document.createElement("li");
+        const ul = document.querySelector("#items")
+        ul.appendChild(li);
+        //li.classList.add('current')
+        li.setAttribute('id','current')
+        li.style.textAlign = "left"
+      } else {
+        let li = document.createElement("li");
+        const ul = document.querySelector("#items")
+        ul.appendChild(li);
+        //li.classList.add('current')
+        li.setAttribute('id','current')
+      }
+    }
+
+    function number(button) {
+        let value = button.value;
+
+        currentString = currentString + value
+        tempNumber = tempNumber + value
+        currentNumber = parseInt(tempNumber)
+
+        const li = document.getElementById('current') || document.getElementById('payment')
+        li.innerText = currentString
+
+        //console.log(currentString)
+    };
+
+    function btnFunction(button) {
+      let value = button.value;
+
+      if (value === "c") {
+        window.location.reload()
+      } else if (value === "+") {
+        if (currentString != "") {
+          currentString = ""
+          multiplier = 1
+          lastNum = 0
+          tempNumber = ""
+
+          Total += currentNumber
+          console.log(Total)
+          currentNumber = 0;
+          //document.getElementsByClassName('current').classList.remove('current')
+          document.getElementById('current').removeAttribute('id')
+          createNewLi()
+        }
+      } else if (value === "total") {
+        if (Total != 0) {
+          if (currentString != "") {
+            currentString = ""
+            multiplier = 1
+            lastNum = 0
+            tempNumber = ""
+
+            Total += currentNumber
+            console.log(Total)
+            currentNumber = 0;
+          }
+
+          let hr = document.createElement("hr");
+          const ul = document.querySelector("#items")
+          ul.appendChild(hr);
+          document.getElementById('current').removeAttribute('id')
+          
+
+          let li = document.createElement("li");
+          ul.appendChild(li);
+          li.innerHTML = `<b>TOTAL: </b>${Total}`
+          li.setAttribute('id','left-text')
+
+          createNewLi(true,true)
+        }
+      } else if (value === "del") {
+        currentString.slice(0,-1)
+
+        tempNumber.slice(0,-1)
+        currentNumber = parseInt(tempNumber)
+
+        document.getElementById('current').innerText = currentString
+      } else if (value === "pay") {
+        console.log('clicked pay')
+        const payText = document.getElementById('payment').innerText
+        const pay = parseInt(payText)
+        console.log(pay)
+        const change = pay - Total
+        console.log('calculated change')
+        console.log(change)
+        let li = document.createElement("li");
+        const ul = document.querySelector("#items")
+        ul.appendChild(li);
+        li.innerHTML = `<b>CHANGE: </b>${change}`
+        li.setAttribute('id','left-text')
+        console.log('written change')
+      } else if (value === "card") {
+        socket.emit('card', (Total))
+      }
+    }
+
+    createNewLi()
+  </script>
+</body>
+</html>

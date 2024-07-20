@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <style>
+    body {
+
+        margin: 0;
+
+        padding: 0;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        background-color: #706b68;
+
+        font-family: Arial, Helvetica, sans-serif;
+
+        }
+
+        .full-screen-div {
+
+        text-align: center;
+
+        font-size: 100px;
+
+        font-weight: bold;
+
+        }
+    </style>
+</head>
+<body>
+  
+    <div style=" display: block;background-color: #706b68; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #847f7c; height: 100vh; width: 10000vw;" class="full-screen-div" id="idle">
+
+        <p style="font-size: 100px;">NCR</p>
+      
+        <p style="font-size: 50px;">£100 Contactless Limit</p>
+      
+      </div>
+
+      <div style="display: none; width: 5000vw; height: 100vh; background-color: #FFFFFF; padding: 20px; border: 1px solid #CCCCCC; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); text-align: center;" id="ready">
+
+        <div id="dots" style="font-size: 140px; color: green;">• • • •</div>
+
+        <div style="font-size: 48px; font-weight: bold; color: #333333;" id="needpay">HUF 10.500</div>
+      
+        <div style="font-size: 24px; color: #666666;">Kérem érintse a kártyát.</div>
+
+        <button id="contactless" style="width: 200px; height: 200px; background: none; border: none;"><img src="contactless.png" alt="" style="width: 200px; height: 200px;"></button>
+      
+      </div>
+
+      <div style="display: none;  width: 200px; height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;" id="message">
+        <div style="font-size: 24px; margin: 10px; font-weight: bold; text-align: center; font-size: 50px; " id="text1"></div>
+        <div style="font-size: 24px; margin: 10px; font-weight: bold; text-align: center; font-size: 50px; " id="text2"></div>
+      </div>
+
+  <script>
+    import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
+    const socket = io()
+
+    function test(value) {
+        document.getElementById('idle').style.display = "none"
+        document.getElementById('ready').style.display = "block"
+        document.getElementById('needpay').innerText = `HUF ${value}`
+        document.body.style.backgroundColor = "#FFFFFF"
+    }
+
+    socket.on('card',(value) => {
+        document.getElementById('idle').style.display = "none"
+        document.getElementById('ready').style.display = "block"
+        document.getElementById('needpay').innerText = `HUF ${value}`
+        document.body.style.backgroundColor = "#FFFFFF"
+        setTimeout(() => {
+            var audio = new Audio('Beep.wav');
+            audio.play();
+            document.getElementById('dots').style.color = "lightgreen"
+            setTimeout(() => {
+                audio.pause()
+                setTimeout(() => {
+                    document.getElementById('text1').innerText = "Kérem várjon..."
+                    document.getElementById('message').display = "block"
+                    ocument.getElementById('ready').display = "none"
+                    setTimeout(() => {
+                        document.getElementById('text1').innerText = "ELFOGADVA"
+                        setTimeout(() => {
+                            document.getElementById('message').style.display = "none"
+                            document.getElementById('idle').style.display = "idle"
+                        }, '3000');
+                    }, "2000");
+                }, "1000");
+            }, "700");
+        }, '2000');
+        
+    }); 
+
+  </script>
+</body>
+</html>
